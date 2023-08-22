@@ -13,12 +13,12 @@ import (
 	models "polygon/models"
 )
 
-func parseAggregateRequest(c cf.Config, ar models.AggregateRequest) string {
+func parseAggregateRequest(c cf.Secrets, ar models.AggregateRequest) string {
 	return fmt.Sprintf("https://api.polygon.io/v2/aggs/ticker/%s/range/%d/%s/%s/%s?adjusted=%t&sort=asc&limit=%d&apiKey=%s",
 		ar.Ticker, ar.RangeLength, ar.RangeType, ar.StartDate, ar.EndDate, ar.Adjusted, ar.Limit, c.PolygonKey)
 }
 
-func getAggregateData(c cf.Config, ar models.AggregateRequest) models.PolygonAggregateResponse {
+func getAggregateData(c cf.Secrets, ar models.AggregateRequest) models.PolygonAggregateResponse {
 	r := parseAggregateRequest(c, ar)
 
 	response, err := http.Get(r)
@@ -93,7 +93,7 @@ func convertAggJSONToCSV(ar models.AggregateRequest, par models.PolygonAggregate
 
 func main() {
 
-	c := cf.GetConfig()
+	c := cf.GetSecrets()
 	ar := models.AggregateRequest{
 		Ticker:      "AAPL",
 		RangeLength: 1,
