@@ -22,7 +22,7 @@ func getData() []jobfetcher.Job {
 
 		path := fmt.Sprintf("./data/%s/%s/%s-%s-%s.csv", ar.Ticker, ar.StartDate, ar.Ticker, ar.RangeType, ar.StartDate)
 		polygon.ConvertAggJSONToCSV(par, path)
-		print("Written file: %s - %s", ar.Ticker, ar.StartDate)
+		print(fmt.Sprintf("Written file: %s - %s \n", ar.Ticker, ar.StartDate))
 	}
 	jh = jh.UpdateJobHistory(jobs)
 	jh.WriteJobHistory("./job_history/job_history.json")
@@ -32,19 +32,26 @@ func getData() []jobfetcher.Job {
 
 func main() {
 	ticker := time.NewTicker(1 * time.Minute)
-	quit := make(chan struct{})
+	defer ticker.Stop()
+
+	done := make(chan bool)
+
 	go func() {
 		for {
 			select {
 			case <-ticker.C:
 				jobs := getData()
 				if len(jobs) == 0 {
-					close(quit)
+					fmt.Println("No jobs returned. Stopping the routine.")
+					done <- true
+					return
 				}
-			case <-quit:
-				ticker.Stop()
+				// Process jobs or do whatever is needed
+			case <-done:
 				return
 			}
 		}
 	}()
+
+	<-done // Wait until the routine is done
 }
