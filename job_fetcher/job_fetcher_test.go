@@ -24,8 +24,8 @@ func Test_GetJobHistory(t *testing.T) {
 			expected: JobHistory{
 				Jobs: []Job{
 					{
-						Ticker:  "AAPL",
-						MaxDate: time.Date(2023, time.August, 21, 0, 0, 0, 0, time.UTC),
+						Ticker: "AAPL",
+						Date:   time.Date(2023, time.August, 21, 0, 0, 0, 0, time.UTC),
 					},
 				},
 			},
@@ -83,8 +83,8 @@ func Test_WriteJobHistory(t *testing.T) {
 			jh: JobHistory{
 				Jobs: []Job{
 					{
-						Ticker:  "AAPL",
-						MaxDate: time.Date(2023, time.August, 21, 0, 0, 0, 0, time.UTC),
+						Ticker: "AAPL",
+						Date:   time.Date(2023, time.August, 21, 0, 0, 0, 0, time.UTC),
 					},
 				},
 			},
@@ -105,7 +105,7 @@ func Test_WriteJobHistory(t *testing.T) {
 	}
 }
 
-func Test_GetTickerMaxDate(t *testing.T) {
+func Test_GetTickerDate(t *testing.T) {
 	tests := []struct {
 		name     string
 		jh       JobHistory
@@ -125,8 +125,8 @@ func Test_GetTickerMaxDate(t *testing.T) {
 			jh: JobHistory{
 				Jobs: []Job{
 					{
-						Ticker:  "AAPL",
-						MaxDate: time.Date(2023, time.August, 21, 0, 0, 0, 0, time.UTC),
+						Ticker: "AAPL",
+						Date:   time.Date(2023, time.August, 21, 0, 0, 0, 0, time.UTC),
 					},
 				},
 			},
@@ -136,8 +136,98 @@ func Test_GetTickerMaxDate(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		result := tt.jh.GetTickerMaxDate(tt.input)
+		result := tt.jh.GetTickerDate(tt.input)
 		if result != tt.expected {
+			t.Errorf("For %s input %v, expected %v but got %v", tt.name, tt.input, tt.expected, result)
+		}
+	}
+}
+
+func Test_UpdateJobHistory(t *testing.T) {
+	tests := []struct {
+		name     string
+		jh       JobHistory
+		input    []Job
+		expected JobHistory
+	}{
+		{
+			name: "nil test",
+			jh: JobHistory{
+				Jobs: []Job{
+					{
+						Ticker: "AAPL",
+						Date:   time.Date(2023, time.August, 21, 0, 0, 0, 0, time.UTC),
+					},
+				}},
+			input: []Job{},
+			expected: JobHistory{
+				Jobs: []Job{
+					{
+						Ticker: "AAPL",
+						Date:   time.Date(2023, time.August, 21, 0, 0, 0, 0, time.UTC),
+					},
+				}},
+		},
+		{
+			name: "Current record gets updated",
+			jh: JobHistory{
+				Jobs: []Job{
+					{
+						Ticker: "AAPL",
+						Date:   time.Date(2023, time.August, 21, 0, 0, 0, 0, time.UTC),
+					},
+				}},
+			input: []Job{
+				{
+					Ticker: "AAPL",
+					Date:   time.Date(2023, time.August, 22, 0, 0, 0, 0, time.UTC),
+				},
+			},
+			expected: JobHistory{
+				Jobs: []Job{
+					{
+						Ticker: "AAPL",
+						Date:   time.Date(2023, time.August, 22, 0, 0, 0, 0, time.UTC),
+					},
+				},
+			},
+		},
+		{
+			name: "Many records gets updated and inserted",
+			jh: JobHistory{
+				Jobs: []Job{
+					{
+						Ticker: "AAPL",
+						Date:   time.Date(2023, time.August, 21, 0, 0, 0, 0, time.UTC),
+					},
+				}},
+			input: []Job{
+				{
+					Ticker: "AAPL",
+					Date:   time.Date(2023, time.August, 22, 0, 0, 0, 0, time.UTC),
+				},
+				{
+					Ticker: "MSFT",
+					Date:   time.Date(2023, time.August, 22, 0, 0, 0, 0, time.UTC),
+				},
+			},
+			expected: JobHistory{
+				Jobs: []Job{
+					{
+						Ticker: "AAPL",
+						Date:   time.Date(2023, time.August, 22, 0, 0, 0, 0, time.UTC),
+					},
+					{
+						Ticker: "MSFT",
+						Date:   time.Date(2023, time.August, 22, 0, 0, 0, 0, time.UTC),
+					},
+				}},
+		},
+	}
+
+	for _, tt := range tests {
+		result := tt.jh.UpdateJobHistory(tt.input)
+		if !reflect.DeepEqual(result, tt.expected) {
 			t.Errorf("For %s input %v, expected %v but got %v", tt.name, tt.input, tt.expected, result)
 		}
 	}
@@ -164,12 +254,12 @@ func Test_GetNewJobs(t *testing.T) {
 			},
 			expected: []Job{
 				{
-					Ticker:  "AAPL",
-					MaxDate: time.Date(2023, time.August, 1, 0, 0, 0, 0, time.UTC),
+					Ticker: "AAPL",
+					Date:   time.Date(2023, time.August, 1, 0, 0, 0, 0, time.UTC),
 				},
 				{
-					Ticker:  "AAPL",
-					MaxDate: time.Date(2023, time.August, 2, 0, 0, 0, 0, time.UTC),
+					Ticker: "AAPL",
+					Date:   time.Date(2023, time.August, 2, 0, 0, 0, 0, time.UTC),
 				},
 			},
 		},
@@ -182,19 +272,19 @@ func Test_GetNewJobs(t *testing.T) {
 			jh: JobHistory{
 				Jobs: []Job{
 					{
-						Ticker:  "AAPL",
-						MaxDate: time.Date(2023, time.August, 21, 0, 0, 0, 0, time.UTC),
+						Ticker: "AAPL",
+						Date:   time.Date(2023, time.August, 21, 0, 0, 0, 0, time.UTC),
 					},
 				},
 			},
 			expected: []Job{
 				{
-					Ticker:  "AAPL",
-					MaxDate: time.Date(2023, time.August, 22, 0, 0, 0, 0, time.UTC),
+					Ticker: "AAPL",
+					Date:   time.Date(2023, time.August, 22, 0, 0, 0, 0, time.UTC),
 				},
 				{
-					Ticker:  "AAPL",
-					MaxDate: time.Date(2023, time.August, 23, 0, 0, 0, 0, time.UTC),
+					Ticker: "AAPL",
+					Date:   time.Date(2023, time.August, 23, 0, 0, 0, 0, time.UTC),
 				},
 			},
 		},
@@ -207,23 +297,23 @@ func Test_GetNewJobs(t *testing.T) {
 			jh: JobHistory{
 				Jobs: []Job{
 					{
-						Ticker:  "AAPL",
-						MaxDate: time.Date(2023, time.August, 29, 0, 0, 0, 0, time.UTC),
+						Ticker: "AAPL",
+						Date:   time.Date(2023, time.August, 29, 0, 0, 0, 0, time.UTC),
 					},
 					{
-						Ticker:  "MSFT",
-						MaxDate: time.Date(2023, time.August, 29, 0, 0, 0, 0, time.UTC),
+						Ticker: "MSFT",
+						Date:   time.Date(2023, time.August, 29, 0, 0, 0, 0, time.UTC),
 					},
 				},
 			},
 			expected: []Job{
 				{
-					Ticker:  "AAPL",
-					MaxDate: time.Date(2023, time.August, 30, 0, 0, 0, 0, time.UTC),
+					Ticker: "AAPL",
+					Date:   time.Date(2023, time.August, 30, 0, 0, 0, 0, time.UTC),
 				},
 				{
-					Ticker:  "MSFT",
-					MaxDate: time.Date(2023, time.August, 30, 0, 0, 0, 0, time.UTC),
+					Ticker: "MSFT",
+					Date:   time.Date(2023, time.August, 30, 0, 0, 0, 0, time.UTC),
 				},
 			},
 		},

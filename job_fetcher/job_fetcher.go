@@ -51,14 +51,31 @@ func (jh JobHistory) WriteJobHistory(path string) {
 	}
 }
 
-func (jh JobHistory) GetTickerMaxDate(t string) time.Time {
-	var maxDate time.Time
+func (jh JobHistory) GetTickerDate(t string) time.Time {
+	var date time.Time
 	for _, jh := range jh.Jobs {
 		if jh.Ticker == t {
-			maxDate = jh.MaxDate
+			date = jh.Date
 		}
 	}
-	return maxDate
+	return date
+}
+
+func (jh JobHistory) UpdateJobHistory(jobs []Job) JobHistory {
+	for _, job := range jobs {
+		recordFound := false
+		for n, j := range jh.Jobs {
+			if j.Ticker == job.Ticker {
+				jh.Jobs[n].Date = job.Date
+				recordFound = true
+				break
+			}
+		}
+		if !recordFound {
+			jh.Jobs = append(jh.Jobs, job)
+		}
+	}
+	return jh
 }
 
 func getNextTradingDay(t time.Time) time.Time {
@@ -69,10 +86,10 @@ func getNextTradingDay(t time.Time) time.Time {
 	}
 }
 
-func GetNextJob(t string, maxDate time.Time) Job {
+func GetNextJob(t string, date time.Time) Job {
 	job := Job{
-		Ticker:  t,
-		MaxDate: getNextTradingDay(maxDate),
+		Ticker: t,
+		Date:   getNextTradingDay(date),
 	}
 	return job
 }
@@ -82,13 +99,13 @@ func GetNewJobs(tickers []string, numberOfJobs int, startDate time.Time, endDate
 
 	i := 0
 	for _, t := range tickers {
-		maxDate := jh.GetTickerMaxDate(t)
+		maxDate := jh.GetTickerDate(t)
 
 		for i < numberOfJobs {
 			if maxDate.Equal(time.Time{}) {
 				j := Job{
-					Ticker:  t,
-					MaxDate: startDate,
+					Ticker: t,
+					Date:   startDate,
 				}
 				jobs = append(jobs, j)
 				maxDate = startDate
@@ -96,7 +113,7 @@ func GetNewJobs(tickers []string, numberOfJobs int, startDate time.Time, endDate
 			} else if maxDate.Before(endDate) {
 				j := GetNextJob(t, maxDate)
 				jobs = append(jobs, j)
-				maxDate = j.MaxDate
+				maxDate = j.Date
 				i += 1
 			} else {
 				break
@@ -114,6 +131,6 @@ type JobHistory struct {
 }
 
 type Job struct {
-	Ticker  string
-	MaxDate time.Time
+	Ticker string
+	Date   time.Time
 }
