@@ -1,3 +1,5 @@
 .env
 data/*
 !data/.gitkeep 
+job_history/*
+!job_history/.gitkeep 
