@@ -65,7 +65,7 @@ func (jh JobHistory) UpdateJobHistory(jobs []Job) JobHistory {
 	for _, job := range jobs {
 		recordFound := false
 		for n, j := range jh.Jobs {
-			if j.Ticker == job.Ticker {
+			if j.Ticker == job.Ticker && j.Date.Before(job.Date) {
 				jh.Jobs[n].Date = job.Date
 				recordFound = true
 				break

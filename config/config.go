@@ -18,10 +18,10 @@ func GetConfig() Config {
 		NumberOfJobs:   5,
 		JobsStartDate:  time.Date(2021, time.August, 1, 0, 0, 0, 0, time.UTC),
 		JobsEndDate:    time.Date(2023, time.August, 1, 0, 0, 0, 0, time.UTC),
-		jobRangeLength: 1,
-		jobRangeType:   "minute",
-		jobAdjusted:    true,
-		jobLimit:       5000,
+		JobRangeLength: 1,
+		JobRangeType:   "minute",
+		JobAdjusted:    true,
+		JobLimit:       5000,
 	}
 	return c
 }
@@ -33,10 +33,10 @@ type Secrets struct {
 type Config struct {
 	Tickers        []string
 	NumberOfJobs   int
-	jobRangeLength int
-	jobRangeType   string
+	JobRangeLength int
+	JobRangeType   string
 	JobsStartDate  time.Time
 	JobsEndDate    time.Time
-	jobAdjusted    bool
-	jobLimit       int
+	JobAdjusted    bool
+	JobLimit       int
 }
